@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import AVFoundation
+import PFInterstitials
 
 class ViewController: UIViewController {
     override func viewDidLoad() {
@@ -14,6 +16,12 @@ class ViewController: UIViewController {
     }
 
     @IBAction func testPressed(_ sender: Any) {
-        print("Test pressed")
+        let event = PFInterstitialEvent(
+            primaryItem: nil,
+            identifier: nil,
+            time: .zero,
+            templateItems: []
+        )
+        print(event.identifier)
     }
 }
