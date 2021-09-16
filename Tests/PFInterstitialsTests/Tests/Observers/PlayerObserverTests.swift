@@ -13,7 +13,7 @@ import XCTest
 class PlayerObserverTests: XCTestCase {
     func test_init_shouldAddObserver() {
         let addObserverExp = expectation(description: "wait for add observer")
-        let player = MockAVPlayer()
+        let player = MockAVQueuePlayer()
         player.addObserverListener = { observer, keyPath, options, context in
             XCTAssert(observer is PlayerObserver)
             XCTAssertEqual(keyPath, #keyPath(AVPlayer.currentItem))
@@ -27,7 +27,7 @@ class PlayerObserverTests: XCTestCase {
 
     func test_deinit_shouldRemoveObserver() {
         let removeObserverExp = expectation(description: "wait for remove observer")
-        let player = MockAVPlayer()
+        let player = MockAVQueuePlayer()
         var sut: PlayerObserver? = PlayerObserver(player: player)
         player.removeObserverListener = { _, keyPath in
             XCTAssertEqual(keyPath, #keyPath(AVPlayer.currentItem))
@@ -43,7 +43,7 @@ class PlayerObserverTests: XCTestCase {
     func test_observeValue_whenCurrentItem_shouldNotifyDelegate() {
         let delegateExp = expectation(description: "wait for delegate notification")
         let delegate = MockPlayerObserverDelegate()
-        let expectedPlayer = MockAVPlayer()
+        let expectedPlayer = MockAVQueuePlayer()
         let expectedItem = MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)
         let sut = PlayerObserver(player: expectedPlayer)
         sut.delegate = delegate
