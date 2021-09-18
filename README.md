@@ -43,9 +43,8 @@ NotificationCenter.default.addObserver(
 
 ## Project Status
 This is still in development stage. The functionality works to a certain degree and is demonstrated as such in the `ReferenceApp` contained within the repo. As of writing there are a few features I would like to accomplish before I consider this useful:
-- Scheduling events by `Date`
-- Resumption offset (currently always `.zero`)
-- Playout limit (currently always `.indefinite`)
-- Automatic handling of `EXT-X-DATERANGE` in manifest
-- Seek rules _(stretch goal given `AVPlayerInterstitialEventController` doesn’t handle this)_
-- Block access to queue modification (perhaps with class extension on `AVQueuePlayer`)
+- [Scheduling events by `Date`](https://github.com/theRealRobG/PFInterstitials/milestone/1)
+- [Resumption offset (currently always `.zero`)](https://github.com/theRealRobG/PFInterstitials/milestone/2)
+- [Playout limit (currently always `.indefinite`)](https://github.com/theRealRobG/PFInterstitials/milestone/3)
+- [Automatic handling of `EXT-X-DATERANGE` in manifest](https://github.com/theRealRobG/PFInterstitials/milestone/4)
+- [Seek rules _(stretch goal given `AVPlayerInterstitialEventController` doesn’t handle this)_](https://github.com/theRealRobG/PFInterstitials/milestone/5)
