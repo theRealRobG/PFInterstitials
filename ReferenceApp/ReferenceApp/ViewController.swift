@@ -16,7 +16,7 @@ extension AVPlayerViewController: RenderingTarget {
 }
 
 class ViewController: UIViewController {
-    let contentURL = URL(string: "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_adv_example_hevc/master.m3u8")!
+    let vodURL = URL(string: "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_adv_example_hevc/master.m3u8")!
     let advertBreak = [
         URL(string: "https://mssl.fwmrm.net/m/1/169843/59/6662075/YVWF0614000H_ENT_MEZZ_HULU_1925786_646/master_cmaf.m3u8")!,
         URL(string: "https://mssl.fwmrm.net/m/1/169843/17/6662161/SBON9969000H_ENT_MEZZ_HULU_1925782_646/master_cmaf.m3u8")!
@@ -48,8 +48,8 @@ class ViewController: UIViewController {
         }
     }
 
-    @IBAction func testPressed(_ sender: Any) {
-        let player = AVPlayer(url: contentURL)
+    @IBAction func playVODPressed(_ sender: Any) {
+        let player = AVPlayer(url: vodURL)
         let playerController = AVPlayerViewController()
         interstitialEventController = PFInterstitialEventController(
             primaryPlayer: player,

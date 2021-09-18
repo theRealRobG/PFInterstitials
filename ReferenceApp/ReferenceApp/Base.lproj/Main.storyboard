@@ -18,10 +18,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="72C-fi-UOm">
-                                <rect key="frame" x="192" y="438" width="30" height="30"/>
-                                <state key="normal" title="Test"/>
+                                <rect key="frame" x="174.5" y="438" width="65" height="30"/>
+                                <state key="normal" title="Play VOD"/>
                                 <connections>
-                                    <action selector="testPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tw4-k7-iWX"/>
+                                    <action selector="playVODPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tw4-k7-iWX"/>
                                 </connections>
                             </button>
                         </subviews>
