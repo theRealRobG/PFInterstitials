@@ -14,6 +14,7 @@
 		E8207CC826F17B8A00BF59AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8207CC726F17B8A00BF59AD /* Assets.xcassets */; };
 		E8207CCB26F17B8A00BF59AD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8207CC926F17B8A00BF59AD /* LaunchScreen.storyboard */; };
 		E8207CD526F17D1900BF59AD /* PFInterstitials in Frameworks */ = {isa = PBXBuildFile; productRef = E8207CD426F17D1900BF59AD /* PFInterstitials */; };
+		E820F72826F6A231000E2CD4 /* AVDateRangeMetadataGroup+hlsRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E820F72726F6A231000E2CD4 /* AVDateRangeMetadataGroup+hlsRepresentation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		E8207CCA26F17B8A00BF59AD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E8207CCC26F17B8A00BF59AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E8207CD226F17CFF00BF59AD /* PFInterstitials */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PFInterstitials; path = ..; sourceTree = "<group>"; };
+		E820F72726F6A231000E2CD4 /* AVDateRangeMetadataGroup+hlsRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVDateRangeMetadataGroup+hlsRepresentation.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,13 +63,14 @@
 		E8207CBD26F17B8900BF59AD /* ReferenceApp */ = {
 			isa = PBXGroup;
 			children = (
+				E8207CCC26F17B8A00BF59AD /* Info.plist */,
 				E8207CBE26F17B8900BF59AD /* AppDelegate.swift */,
+				E820F72726F6A231000E2CD4 /* AVDateRangeMetadataGroup+hlsRepresentation.swift */,
 				E8207CC026F17B8900BF59AD /* SceneDelegate.swift */,
 				E8207CC226F17B8900BF59AD /* ViewController.swift */,
-				E8207CC426F17B8900BF59AD /* Main.storyboard */,
 				E8207CC726F17B8A00BF59AD /* Assets.xcassets */,
 				E8207CC926F17B8A00BF59AD /* LaunchScreen.storyboard */,
-				E8207CCC26F17B8A00BF59AD /* Info.plist */,
+				E8207CC426F17B8900BF59AD /* Main.storyboard */,
 			);
 			path = ReferenceApp;
 			sourceTree = "<group>";
@@ -152,6 +155,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E820F72826F6A231000E2CD4 /* AVDateRangeMetadataGroup+hlsRepresentation.swift in Sources */,
 				E8207CC326F17B8900BF59AD /* ViewController.swift in Sources */,
 				E8207CBF26F17B8900BF59AD /* AppDelegate.swift in Sources */,
 				E8207CC126F17B8900BF59AD /* SceneDelegate.swift in Sources */,
