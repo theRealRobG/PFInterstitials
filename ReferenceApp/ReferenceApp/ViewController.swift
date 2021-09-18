@@ -76,7 +76,22 @@ class ViewController: UIViewController {
     @IBAction func playLivePressed(_ sender: Any) {
         let player = AVPlayer(url: liveURL)
         let playerController = AVPlayerViewController()
+        let collector = AVPlayerItemMetadataCollector()
+        collector.setDelegate(self, queue: .main)
+        player.currentItem?.add(collector)
         playerController.player = player
         present(playerController, animated: true) { player.play() }
+    }
+}
+
+extension ViewController: AVPlayerItemMetadataCollectorPushDelegate {
+    func metadataCollector(
+        _ metadataCollector: AVPlayerItemMetadataCollector,
+        didCollect metadataGroups: [AVDateRangeMetadataGroup],
+        indexesOfNewGroups: IndexSet,
+        indexesOfModifiedGroups: IndexSet
+    ) {
+        let newGroups = indexesOfNewGroups.map { metadataGroups[$0] }
+        newGroups.forEach { print($0.hlsRepresentation) }
     }
 }
