@@ -17,19 +17,40 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="72C-fi-UOm">
-                                <rect key="frame" x="174.5" y="438" width="65" height="30"/>
-                                <state key="normal" title="Play VOD"/>
-                                <connections>
-                                    <action selector="playVODPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tw4-k7-iWX"/>
-                                </connections>
-                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Mnh-nt-kHO">
+                                <rect key="frame" x="154.5" y="388" width="105" height="130"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="72C-fi-UOm">
+                                        <rect key="frame" x="20" y="10" width="65" height="30"/>
+                                        <state key="normal" title="Play VOD"/>
+                                        <connections>
+                                            <action selector="playVODPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tw4-k7-iWX"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PqV-TJ-cig">
+                                        <rect key="frame" x="22" y="90" width="61" height="30"/>
+                                        <state key="normal" title="Play Live"/>
+                                        <connections>
+                                            <action selector="playLivePressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="kY3-W7-lDN"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="PqV-TJ-cig" firstAttribute="top" secondItem="72C-fi-UOm" secondAttribute="bottom" constant="50" id="NwL-9M-ykE"/>
+                                    <constraint firstAttribute="bottom" secondItem="PqV-TJ-cig" secondAttribute="bottom" constant="10" id="Wpl-X2-SKZ"/>
+                                    <constraint firstItem="PqV-TJ-cig" firstAttribute="centerX" secondItem="Mnh-nt-kHO" secondAttribute="centerX" id="aNo-xX-g1g"/>
+                                    <constraint firstItem="72C-fi-UOm" firstAttribute="centerX" secondItem="Mnh-nt-kHO" secondAttribute="centerX" id="e4n-GG-TRO"/>
+                                    <constraint firstItem="72C-fi-UOm" firstAttribute="top" secondItem="Mnh-nt-kHO" secondAttribute="top" constant="10" id="z7h-co-XZO"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="72C-fi-UOm" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="EFu-fM-zyC"/>
-                            <constraint firstItem="72C-fi-UOm" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="hrs-Al-pdy"/>
+                            <constraint firstItem="Mnh-nt-kHO" firstAttribute="width" secondItem="6Tk-OE-BBY" secondAttribute="width" multiplier="0.253623" id="0pM-uH-ZCN"/>
+                            <constraint firstItem="Mnh-nt-kHO" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Fhv-9T-o2r"/>
+                            <constraint firstItem="Mnh-nt-kHO" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="vsW-Fm-K1D"/>
                         </constraints>
                     </view>
                 </viewController>
