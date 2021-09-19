@@ -15,10 +15,14 @@ class MockAVQueuePlayer: AVQueuePlayer {
     var removeObserverListener: ((NSObject, String) -> Void)?
     var addBoundaryTimeObserverListener: (([NSValue], DispatchQueue?, () -> Void) -> Void)?
     var removeTimeObserverListener: ((Any) -> Void)?
+    var insertListener: ((AVPlayerItem, AVPlayerItem?) -> Void)?
+    var itemsListener: (() -> Void)?
+    var removeAllItemsListener: (() -> Void)?
 
     // MARK: - Mock return values
 
-    var addBoundaryTimeObserverReturn: Any = NSObject()
+    var addBoundaryTimeObserverReturnValue: Any = NSObject()
+    var itemsReturnValue = [MockAVPlayerItem]()
 
     // MARK: - Override properties
 
@@ -46,10 +50,23 @@ class MockAVQueuePlayer: AVQueuePlayer {
         using block: @escaping () -> Void
     ) -> Any {
         addBoundaryTimeObserverListener?(times, queue, block)
-        return addBoundaryTimeObserverReturn
+        return addBoundaryTimeObserverReturnValue
     }
 
     override func removeTimeObserver(_ observer: Any) {
         removeTimeObserverListener?(observer)
+    }
+
+    override func insert(_ item: AVPlayerItem, after afterItem: AVPlayerItem?) {
+        insertListener?(item, afterItem)
+    }
+
+    override func items() -> [AVPlayerItem] {
+        itemsListener?()
+        return itemsReturnValue
+    }
+
+    override func removeAllItems() {
+        removeAllItemsListener?()
     }
 }
