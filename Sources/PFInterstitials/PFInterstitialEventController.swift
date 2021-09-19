@@ -167,7 +167,9 @@ extension PFInterstitialEventController: PlayerItemObserverDelegate {
         let queuedItems = interstitialPlayer.items()
         let isQueueSetUpCorrectly = playerItems.count == queuedItems.count && queuedItems.enumerated().allSatisfy { index, item in
             guard playerItems.indices.contains(index) else { return false }
-            return item.url?.absoluteURL == playerItems[index].url?.absoluteURL
+            let sameURL = item.url?.absoluteURL == playerItems[index].url?.absoluteURL
+            let sameID = item.interstitialEventIdentifier == playerItems[index].interstitialEventIdentifier
+            return sameURL && sameID
         }
         guard isQueueSetUpCorrectly else {
             interstitialPlayer.removeAllItems()
