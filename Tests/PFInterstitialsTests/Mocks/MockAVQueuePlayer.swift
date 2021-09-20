@@ -13,11 +13,13 @@ class MockAVQueuePlayer: AVQueuePlayer {
 
     var addObserverListener: ((NSObject, String, NSKeyValueObservingOptions, UnsafeMutableRawPointer?) -> Void)?
     var removeObserverListener: ((NSObject, String) -> Void)?
-    var addBoundaryTimeObserverListener: (([NSValue], DispatchQueue?, () -> Void) -> Void)?
+    var addBoundaryTimeObserverListener: (([NSValue], DispatchQueue?, @escaping () -> Void) -> Void)?
     var removeTimeObserverListener: ((Any) -> Void)?
     var insertListener: ((AVPlayerItem, AVPlayerItem?) -> Void)?
     var itemsListener: (() -> Void)?
     var removeAllItemsListener: (() -> Void)?
+    var pauseListener: (() -> Void)?
+    var playListener: (() -> Void)?
 
     // MARK: - Mock return values
 
@@ -68,5 +70,13 @@ class MockAVQueuePlayer: AVQueuePlayer {
 
     override func removeAllItems() {
         removeAllItemsListener?()
+    }
+
+    override func pause() {
+        pauseListener?()
+    }
+
+    override func play() {
+        playListener?()
     }
 }

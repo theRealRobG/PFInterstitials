@@ -20,6 +20,8 @@ class PFInterstitialEventControllerTests: XCTestCase {
     var mockPrimaryPlayerItemObserver: MockPlayerItemObserver!
     var mockInterstitialPlayerObserver: MockPlayerObserver!
 
+    var defaultNotifcationCenterObserver: NSObjectProtocol?
+
     override func setUp() {
         mockPrimaryPlayerItem = MockAVPlayerItem(url: URL(string: "http://test.com/master.m3u8")!)
         mockPrimaryPlayer = MockAVQueuePlayer()
@@ -30,6 +32,11 @@ class PFInterstitialEventControllerTests: XCTestCase {
         mockPrimaryPlayerItemObserver = MockPlayerItemObserver()
         mockInterstitialPlayerObserver = MockPlayerObserver()
         initialiseSUT()
+    }
+
+    override func tearDown() {
+        defaultNotifcationCenterObserver.map { NotificationCenter.default.removeObserver($0) }
+        defaultNotifcationCenterObserver = nil
     }
 
     func initialiseSUT() {
@@ -131,7 +138,7 @@ class PFInterstitialEventControllerTests: XCTestCase {
             date: expectedDate,
             templateItems: []
         )
-        let observer = NotificationCenter.default.addObserver(
+        defaultNotifcationCenterObserver = NotificationCenter.default.addObserver(
             forName: PFInterstitialEventController.eventsDidChangeNotification,
             object: nil,
             queue: .main
@@ -147,7 +154,6 @@ class PFInterstitialEventControllerTests: XCTestCase {
         }
         sut.events.append(expectedEvent)
         wait(for: [eventsUpdatedExp], timeout: 0.1)
-        NotificationCenter.default.removeObserver(observer)
     }
 
     /// Since the array of scheduled events has changed, we need to update where the event boundaries sit on the primary player
@@ -233,6 +239,106 @@ class PFInterstitialEventControllerTests: XCTestCase {
         sut.events = [expectedEvent]
 
         wait(for: [queueInsertExp], timeout: 0.1)
+    }
+
+    /// Boundary time observers are used to trigger where a transition from primary player to interstitial player should be made.
+    func test_boundaryTimeObserver_whenBoundaryFiresAndInterstitialQueueIsNonEmpty_shouldSwitchToInterstitialPlayerAndPlay() {
+        let primaryPauseExp = expectation(description: "wait for pause on primary player")
+        let updateRefExp = expectation(description: "wait for update player on rendering target")
+        let interstitialPlayExp = expectation(description: "wait for play on interstitial player")
+        let items = [MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = items
+        mockInterstitialPlayer.fakeCurrentItem = items[0]
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        mockPrimaryPlayer.pauseListener = { primaryPauseExp.fulfill() }
+        mockRenderingTarget.updatePlayerReferenceListener = { newPlayer in
+            XCTAssert(newPlayer === self.mockInterstitialPlayer)
+            updateRefExp.fulfill()
+        }
+        mockInterstitialPlayer.playListener = { interstitialPlayExp.fulfill() }
+
+        boundaryCompletion?()
+
+        wait(
+            for: [primaryPauseExp, updateRefExp, interstitialPlayExp],
+            timeout: 0.1,
+            enforceOrder: true
+        )
+    }
+
+    /// When we move to the interstitial player for an event that was not previously playing then the consumer needs to be notified
+    /// about the new current event.
+    func test_boundaryTimeObserver_whenStartsNewEvent_shouldNotifyCurrentEventDidChange() {
+        let newEventExp = expectation(description: "wait for new event notification")
+        let items = [MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = items
+        mockInterstitialPlayer.fakeCurrentItem = items[0]
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        defaultNotifcationCenterObserver = NotificationCenter.default.addObserver(
+            forName: PFInterstitialEventController.currentEventDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let eventController = notification.object as? PFInterstitialEventController else {
+                return XCTFail("Expected Notification object to be PFInterstitialEventController")
+            }
+            XCTAssert(eventController === self?.sut)
+            XCTAssertEqual(eventController.currentEvent?.identifier, event.identifier)
+            newEventExp.fulfill()
+        }
+
+        boundaryCompletion?()
+
+        wait(for: [newEventExp], timeout: 0.1)
+    }
+
+    /// If the boundary observer fires when there are no items in the interstitial queue, then something has probably gone wrong, but
+    /// for sure we should not move to the interstitial player as this will likely leave us in a broken state.
+    func test_boundaryTimeObserver_whenBoundaryFires_butQueueIsEmpty_shouldNotSwitchToInterstitialPlayer() {
+        let primaryPauseExp = expectation(description: "wait for pause on primary player")
+        primaryPauseExp.isInverted = true
+        let updateRefExp = expectation(description: "wait for update player on rendering target")
+        updateRefExp.isInverted = true
+        let interstitialPlayExp = expectation(description: "wait for play on interstitial player")
+        interstitialPlayExp.isInverted = true
+        let items = [MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = []
+        mockInterstitialPlayer.fakeCurrentItem = nil
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        mockPrimaryPlayer.pauseListener = { primaryPauseExp.fulfill() }
+        mockRenderingTarget.updatePlayerReferenceListener = { _ in updateRefExp.fulfill() }
+        mockInterstitialPlayer.playListener = { interstitialPlayExp.fulfill() }
+
+        boundaryCompletion?()
+
+        wait(
+            for: [primaryPauseExp, updateRefExp, interstitialPlayExp],
+            timeout: 0.1
+        )
     }
 
     // MARK: - PlayerItemObserverDelegate
@@ -495,5 +601,210 @@ class PFInterstitialEventControllerTests: XCTestCase {
             didUpdateLoadedTimeRanges: ranges
         )
         wait(for: [queueInsertExp], timeout: 0.1)
+    }
+
+    // MARK: - PlayerObserverDelegate
+
+    /// An item change within an event is still the same interstitial event and so no change should be notified.
+    func test_didChangeCurrentItem_whenChangingBetweenItemsOfSameEvent_shouldNotNotifyEventChanged() {
+        let newEventExp = expectation(description: "wait for new event notification")
+        newEventExp.expectedFulfillmentCount = 1
+        let items = [
+            MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!),
+            MockAVPlayerItem(url: URL(string: "https://test.com/next/master.m3u8")!)
+        ]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = items
+        mockInterstitialPlayer.fakeCurrentItem = items[0]
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        defaultNotifcationCenterObserver = NotificationCenter.default.addObserver(
+            forName: PFInterstitialEventController.currentEventDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let eventController = notification.object as? PFInterstitialEventController else {
+                return XCTFail("Expected Notification object to be PFInterstitialEventController")
+            }
+            XCTAssert(eventController === self?.sut)
+            XCTAssertEqual(eventController.currentEvent?.identifier, event.identifier)
+            newEventExp.fulfill()
+        }
+
+        boundaryCompletion?()
+        mockInterstitialPlayerObserver.delegate?.player(
+            mockInterstitialPlayer,
+            didChangeCurrentItem: items[1]
+        )
+
+        wait(for: [newEventExp], timeout: 0.1)
+    }
+
+    /// Once the current queue of interstitial items has finished it means that it is time to return to the primary player.
+    func test_didChangeCurrentItem_whenInterstitial_andItemIsNil_shouldTransitionBackToPrimaryPlayer() {
+        let interstitialPauseExp = expectation(description: "wait for pause on interstitial player")
+        let updateRefExp = expectation(description: "wait for update player on rendering target")
+        let primaryPlayExp = expectation(description: "wait for play on primary player")
+        let items = [MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = items
+        mockInterstitialPlayer.fakeCurrentItem = items[0]
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        boundaryCompletion?()
+
+        mockInterstitialPlayer.pauseListener = { interstitialPauseExp.fulfill() }
+        mockRenderingTarget.updatePlayerReferenceListener = { newPlayer in
+            XCTAssert(newPlayer === self.mockPrimaryPlayer)
+            updateRefExp.fulfill()
+        }
+        mockPrimaryPlayer.playListener = { primaryPlayExp.fulfill() }
+
+        mockInterstitialPlayerObserver.delegate?.player(
+            mockInterstitialPlayer,
+            didChangeCurrentItem: nil
+        )
+
+        wait(
+            for: [interstitialPauseExp, updateRefExp, primaryPlayExp],
+            timeout: 0.1,
+            enforceOrder: true
+        )
+    }
+
+    /// When the interstitial items in the queue have finished and we return to the primary player then the current event should be
+    /// updated to be nil and this should be notified.
+    func test_didChangeCurrentItem_whenInterstitial_andItemIsNil_shouldNotifyCurrentEventIsNil() {
+        let newEventExp = expectation(description: "wait for new event notification")
+        let items = [MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = items
+        mockInterstitialPlayer.fakeCurrentItem = items[0]
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        boundaryCompletion?()
+
+        defaultNotifcationCenterObserver = NotificationCenter.default.addObserver(
+            forName: PFInterstitialEventController.currentEventDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let eventController = notification.object as? PFInterstitialEventController else {
+                return XCTFail("Expected Notification object to be PFInterstitialEventController")
+            }
+            XCTAssert(eventController === self?.sut)
+            XCTAssertNil(eventController.currentEvent)
+            newEventExp.fulfill()
+        }
+        mockInterstitialPlayerObserver.delegate?.player(
+            mockInterstitialPlayer,
+            didChangeCurrentItem: nil
+        )
+
+        wait(for: [newEventExp], timeout: 0.1)
+    }
+
+    /// If we encounter a situation where a new item starts but we can't match it to any event, then something has gone wrong, and
+    /// to be safe we just remove all items from the interstitial queue and return to primary (otherwise what would be set as the current event?).
+    func test_didChangeCurrentItem_whenInterstitial_andItemDoesNotMatchAnyEvent_shouldRemoveAllItemsAndGoBackToPrimary() {
+        let interstitialPauseExp = expectation(description: "wait for pause on interstitial player")
+        let updateRefExp = expectation(description: "wait for update player on rendering target")
+        let removeItemsExp = expectation(description: "wait for remove all items")
+        let primaryPlayExp = expectation(description: "wait for play on primary player")
+        let eventNotificationExp = expectation(description: "wait for nil event notification")
+        let items = [MockAVPlayerItem(url: URL(string: "https://test.com/master.m3u8")!)]
+        let event = PFInterstitialEvent(
+            primaryItem: mockPrimaryPlayerItem,
+            identifier: "test-ad-id",
+            time: CMTime(value: 10, timescale: 1),
+            templateItems: items
+        )
+        mockInterstitialPlayer.itemsReturnValue = items
+        mockInterstitialPlayer.fakeCurrentItem = items[0]
+        var boundaryCompletion: (() -> Void)?
+        mockPrimaryPlayer.addBoundaryTimeObserverListener = { boundaryCompletion = $2 }
+        sut.events = [event]
+        boundaryCompletion?()
+
+        mockInterstitialPlayer.pauseListener = { interstitialPauseExp.fulfill() }
+        mockRenderingTarget.updatePlayerReferenceListener = { newPlayer in
+            XCTAssert(newPlayer === self.mockPrimaryPlayer)
+            updateRefExp.fulfill()
+        }
+        mockInterstitialPlayer.removeAllItemsListener = { removeItemsExp.fulfill() }
+        defaultNotifcationCenterObserver = NotificationCenter.default.addObserver(
+            forName: PFInterstitialEventController.currentEventDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let eventController = notification.object as? PFInterstitialEventController else {
+                return XCTFail("Expected Notification object to be PFInterstitialEventController")
+            }
+            XCTAssert(eventController === self?.sut)
+            XCTAssertNil(eventController.currentEvent)
+            eventNotificationExp.fulfill()
+        }
+        mockPrimaryPlayer.playListener = { primaryPlayExp.fulfill() }
+
+        mockInterstitialPlayerObserver.delegate?.player(
+            mockInterstitialPlayer,
+            didChangeCurrentItem: MockAVPlayerItem(url: URL(string: "http://weird.com/strange.m3u8")!)
+        )
+
+        wait(
+            for: [
+                interstitialPauseExp,
+                updateRefExp,
+                removeItemsExp,
+                eventNotificationExp,
+                primaryPlayExp
+            ],
+            timeout: 0.1,
+            enforceOrder: true
+        )
+    }
+
+    /// We always want to make sure we are observing the current primary item so must react to any changes.
+    func test_didChangeCurrentItem_whenPrimary_shouldStartObservingItem() {
+        let startObservingExp = expectation(description: "wait for start observing")
+        let expectedItem = MockAVPlayerItem(url: URL(string: "http://mock.com/master.m3u8")!)
+        mockPrimaryPlayerItemObserver.startObservingListener = { item in
+            XCTAssert(item === expectedItem)
+            startObservingExp.fulfill()
+        }
+        mockPrimaryPlayerObserver.delegate?.player(
+            mockPrimaryPlayer,
+            didChangeCurrentItem: expectedItem
+        )
+        wait(for: [startObservingExp], timeout: 0.1)
+    }
+
+    /// If we don't have any current item then we should stop observing any item that existed before.
+    func test_didChangeCurrentItem_whenPrimary_itemIsNil_shouldStopObserving() {
+        let stopObservingExp = expectation(description: "wait for start observing")
+        mockPrimaryPlayerItemObserver.stopObservingListener = { stopObservingExp.fulfill() }
+        mockPrimaryPlayerObserver.delegate?.player(
+            mockPrimaryPlayer,
+            didChangeCurrentItem: nil
+        )
+        wait(for: [stopObservingExp], timeout: 0.1)
     }
 }
