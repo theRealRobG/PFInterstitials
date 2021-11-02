@@ -14,10 +14,12 @@ class MockAVPlayerItem: AVPlayerItem {
     var addObserverListener: ((NSObject, String, NSKeyValueObservingOptions, UnsafeMutableRawPointer?) -> Void)?
     var removeObserverListener: ((NSObject, String) -> Void)?
     var currentTimeListener: (() -> Void)?
+    var currentDateListener: (() -> Void)?
 
     // MARK: - Mock return values
 
     var currentTimeReturnValue = CMTime.zero
+    var currentDateReturnValue: Date?
 
     // MARK: - Override properties
 
@@ -42,5 +44,10 @@ class MockAVPlayerItem: AVPlayerItem {
     override func currentTime() -> CMTime {
         currentTimeListener?()
         return currentTimeReturnValue
+    }
+
+    override func currentDate() -> Date? {
+        currentDateListener?()
+        return currentDateReturnValue
     }
 }

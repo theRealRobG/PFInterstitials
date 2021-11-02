@@ -60,6 +60,7 @@ public class PFInterstitialEventController {
     private let primaryPlayerObserver: PlayerObserver
     private let primaryPlayerItemObserver: PlayerItemObserver
     private let interstitialPlayerObserver: PlayerObserver
+    private let dateTimeService: DateTimeService
     private var interstitialTransitionObserver: Any?
     private var scheduledInterstitialEvents = [CMTime: [PFInterstitialEvent]]() {
         didSet { updateInterstitialTransitionTimes() }
@@ -74,13 +75,15 @@ public class PFInterstitialEventController {
         let primaryPlayerObserver = PlayerObserver(player: primaryPlayer)
         let primaryPlayerItemObserver = PlayerItemObserver()
         let interstitialPlayerObserver = PlayerObserver(player: interstitialPlayer)
+        let dateTimeService = DateTimeService(primaryPlayer: primaryPlayer)
         self.init(
             primaryPlayer: primaryPlayer,
             renderingTarget: renderingTarget,
             interstitialPlayer: interstitialPlayer,
             primaryPlayerObserver: primaryPlayerObserver,
             primaryPlayerItemObserver: primaryPlayerItemObserver,
-            interstitialPlayerObserver: interstitialPlayerObserver
+            interstitialPlayerObserver: interstitialPlayerObserver,
+            dateTimeService: dateTimeService
         )
     }
 
@@ -90,7 +93,8 @@ public class PFInterstitialEventController {
         interstitialPlayer: AVQueuePlayer,
         primaryPlayerObserver: PlayerObserver,
         primaryPlayerItemObserver: PlayerItemObserver,
-        interstitialPlayerObserver: PlayerObserver
+        interstitialPlayerObserver: PlayerObserver,
+        dateTimeService: DateTimeService
     ) {
         self.primaryPlayer = primaryPlayer
         self.renderingTarget = renderingTarget
@@ -99,6 +103,7 @@ public class PFInterstitialEventController {
         self.primaryPlayerObserver = primaryPlayerObserver
         self.primaryPlayerItemObserver = primaryPlayerItemObserver
         self.interstitialPlayerObserver = interstitialPlayerObserver
+        self.dateTimeService = dateTimeService
         primaryPlayerObserver.delegate = self
         primaryPlayerItemObserver.delegate = self
         interstitialPlayerObserver.delegate = self

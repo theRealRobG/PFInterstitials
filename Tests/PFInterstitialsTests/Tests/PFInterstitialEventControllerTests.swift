@@ -19,6 +19,7 @@ class PFInterstitialEventControllerTests: XCTestCase {
     var mockPrimaryPlayerObserver: MockPlayerObserver!
     var mockPrimaryPlayerItemObserver: MockPlayerItemObserver!
     var mockInterstitialPlayerObserver: MockPlayerObserver!
+    var mockDateTimeService: MockDateTimeService!
 
     var defaultNotifcationCenterObserver: NSObjectProtocol?
 
@@ -31,6 +32,7 @@ class PFInterstitialEventControllerTests: XCTestCase {
         mockPrimaryPlayerObserver = MockPlayerObserver()
         mockPrimaryPlayerItemObserver = MockPlayerItemObserver()
         mockInterstitialPlayerObserver = MockPlayerObserver()
+        mockDateTimeService = MockDateTimeService()
         initialiseSUT()
     }
 
@@ -46,7 +48,8 @@ class PFInterstitialEventControllerTests: XCTestCase {
             interstitialPlayer: mockInterstitialPlayer,
             primaryPlayerObserver: mockPrimaryPlayerObserver,
             primaryPlayerItemObserver: mockPrimaryPlayerItemObserver,
-            interstitialPlayerObserver: mockInterstitialPlayerObserver
+            interstitialPlayerObserver: mockInterstitialPlayerObserver,
+            dateTimeService: mockDateTimeService
         )
     }
 
