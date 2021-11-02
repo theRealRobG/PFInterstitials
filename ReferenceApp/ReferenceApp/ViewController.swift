@@ -76,6 +76,10 @@ class ViewController: UIViewController {
     @IBAction func playLivePressed(_ sender: Any) {
         let player = AVPlayer(url: liveURL)
         let playerController = AVPlayerViewController()
+        interstitialEventController = PFInterstitialEventController(
+            primaryPlayer: player,
+            renderingTarget: playerController
+        )
         let collector = AVPlayerItemMetadataCollector()
         collector.setDelegate(self, queue: .main)
         player.currentItem?.add(collector)
