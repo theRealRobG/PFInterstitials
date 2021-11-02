@@ -177,6 +177,8 @@ extension PFInterstitialEventController: PlayerItemObserverDelegate {
             return
         }
     }
+
+    func playerItem(_ playerItem: AVPlayerItem, didUpdateEffectiveRate effectiveRate: Double) {}
 }
 
 // MARK: - Scheduling Interstitials
