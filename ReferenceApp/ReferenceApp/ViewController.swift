@@ -17,7 +17,7 @@ extension AVPlayerViewController: RenderingTarget {
 
 class ViewController: UIViewController {
     let vodURL = URL(string: "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_adv_example_hevc/master.m3u8")!
-    let liveURL = URL(string: "https://live.unified-streaming.com/scte35/scte35.isml/master.m3u8?hls_fmp4")!
+    let liveURL = URL(string: "https://demo.unified-streaming.com/k8s/live/stable/scte35.isml/master.m3u8?hls_fmp4")!
     let advertBreak = [
         URL(string: "https://mssl.fwmrm.net/m/1/169843/59/6662075/YVWF0614000H_ENT_MEZZ_HULU_1925786_646/master_cmaf.m3u8")!,
         URL(string: "https://mssl.fwmrm.net/m/1/169843/17/6662161/SBON9969000H_ENT_MEZZ_HULU_1925782_646/master_cmaf.m3u8")!
