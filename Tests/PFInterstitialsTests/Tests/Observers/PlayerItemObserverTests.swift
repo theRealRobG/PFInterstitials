@@ -129,8 +129,8 @@ class PlayerItemObserverTests: XCTestCase {
             delegateExp.fulfill()
         }
         sut.startObserving(playerItem: expectedItem)
-        guard let selector = selector else { return XCTFail() }
-        sut.performSelector(onMainThread: selector, with: nil, waitUntilDone: false)
+        guard let effectiveRateChangedSelector = selector else { return XCTFail() }
+        sut.performSelector(onMainThread: effectiveRateChangedSelector, with: nil, waitUntilDone: false)
         wait(for: [delegateExp], timeout: 0.1)
     }
 
