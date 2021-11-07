@@ -82,7 +82,13 @@ class DateTimeService: PlayerObserverDelegate, PlayerItemObserverDelegate {
     // MARK: - Private helpers
 
     private func addDateTimeMappingIfPossible() {
-        guard let playerItem = currentPrimaryPlayerItem, let currentDate = playerItem.currentDate() else { return }
+        guard
+            let playerItem = currentPrimaryPlayerItem,
+            playerItem.isPlaybackLikelyToKeepUp, // date/time map is unreliable when playback not likely to keep up
+            let currentDate = playerItem.currentDate()
+        else {
+            return
+        }
         dateTimeConverter.add(mapping: DateTimeMapping(date: currentDate, time: playerItem.currentTime()))
     }
 }

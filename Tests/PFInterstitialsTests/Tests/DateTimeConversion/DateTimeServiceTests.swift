@@ -130,6 +130,18 @@ class DateTimeServiceTests: XCTestCase {
         wait(for: [addMappingExp], timeout: 0.1)
     }
 
+    func test_didUpdateEffectiveRate_whenDidStartPlaying_andRateIsZero_butPlaybacNotLikelyToKeepUp_shouldNotAddTimeMapping() {
+        let addMappingExp = expectation(description: "wait for add mapping")
+        addMappingExp.isInverted = true
+        mockPrimaryPlayerItem.currentTimeReturnValue = CMTime(value: 100, timescale: 1)
+        mockPrimaryPlayerItem.currentDateReturnValue = Date(timeIntervalSince1970: 100)
+        mockPrimaryPlayerItem.fakeIsPlaybackLikelyToKeepUp = false
+        sut.playerItem(mockPrimaryPlayerItem, didUpdateEffectiveRate: 1)
+        mockDateTimeConverter.addListener = { _ in addMappingExp.fulfill() }
+        sut.playerItem(mockPrimaryPlayerItem, didUpdateEffectiveRate: 0)
+        wait(for: [addMappingExp], timeout: 0.1)
+    }
+
     func test_didChangeCurrentItem_whenNewItem_shouldStartObserving() {
         let startObservingExp = expectation(description: "wait for start observing")
         let expectedItem = MockAVPlayerItem(url: URL(string: "http://expected.com/master.m3u8")!)

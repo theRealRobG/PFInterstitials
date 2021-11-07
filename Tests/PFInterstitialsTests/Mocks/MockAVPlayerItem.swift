@@ -26,6 +26,9 @@ class MockAVPlayerItem: AVPlayerItem {
     override var loadedTimeRanges: [NSValue] { fakeLoadedTimeRanges }
     var fakeLoadedTimeRanges = [NSValue]()
 
+    override var isPlaybackLikelyToKeepUp: Bool { fakeIsPlaybackLikelyToKeepUp }
+    var fakeIsPlaybackLikelyToKeepUp = true
+
     // MARK: - Override functions
 
     override func addObserver(
